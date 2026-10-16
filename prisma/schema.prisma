@@ -1,0 +1,80 @@
+generator client {
+  provider      = "prisma-client-js"
+  // 新 schema 名：localllm（public 嘅 259 行主檔唔郁）
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // 新 database schema：public 嘅 259 行主檔唔郁，新表全部喺 localllm
+  schemas  = ["localllm"]
+}
+
+model Restaurant {
+  id        String   @id @default(cuid())
+  nameZh    String?
+  nameEn    String?
+  address   String
+  district  String   @default("將軍澳")
+  cuisines  String[]
+  priceMin  Int?
+  priceMax  Int?
+  seats     Int?
+  rating    Float?
+  phone     String?
+  notes     String?
+  licence   String?
+  hours     String?
+  poiId     String?  @unique
+  source    String   @default("OpenRice")
+  hidden    Boolean  @default(false)
+  closed    Boolean  @default(false)
+  visited   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  visits    Visit[]
+  changes   RestaurantChange[]
+  menus     Menu[]
+
+  @@index([district])
+  @@index([priceMax])
+  @@index([cuisines])
+  @@schema("localllm")
+}
+
+model Visit {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  visitedAt    DateTime   @default(now())
+  note         String?
+
+  @@index([restaurantId])
+  @@schema("localllm")
+}
+
+model RestaurantChange {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  field        String
+  value        String
+  source       String     @default("public")
+  createdAt    DateTime   @default(now())
+
+  @@index([restaurantId])
+  @@schema("localllm")
+}
+
+model Menu {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  url          String?
+  items        String[]
+  createdAt    DateTime   @default(now())
+
+  @@index([restaurantId])
+  @@schema("localllm")
+}
