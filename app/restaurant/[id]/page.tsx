@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "../../../lib/prisma";
 import { recordVisit, addMenu } from "../../actions";
+import { mallOf } from "../../../lib/malls";
 
 export const dynamic = "force-dynamic";
 
@@ -24,28 +25,27 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         {[r.nameZh, r.nameEn].filter(Boolean).join(" / ") || r.address}
       </h1>
 
-      <p className="mb-4">
-        <Link
-          href={`/restaurant/${r.id}/edit`}
-          className="px-3 py-2 rounded-md border border-gray-200 bg-white text-gray-900"
-        >
+      <p className="mb-4 flex flex-wrap gap-2 text-xs">
+        <span className="badge">{mallOf(r.address)}</span>
+        {r.visited && <span className="badge badge-alt">去過</span>}
+        {r.closed && <span className="badge badge-alt">已結業</span>}
+        <Link href={`/restaurant/${r.id}/edit`} className="btn-quiet">
           編輯
         </Link>
       </p>
 
-      <div className="text-sm text-gray-600 mb-4">
+      <div className="card mb-4 text-sm muted">
         {r.cuisines.join(" / ")} · {r.address} · 人均 ${r.priceMin ?? "?"}–${r.priceMax ?? "?"} ·{" "}
-        評分 {r.rating ?? "無"} · 座位 {r.seats ?? "待補"} · {r.visited ? "去過" : "未去過"}
-        {r.closed ? " · 已結業" : ""}
+        評分 {r.rating ?? "無"} · 座位 {r.seats ?? "待補"}
       </div>
 
-      {r.hours && <p className="text-sm text-gray-600 mb-4">營業時間：{r.hours}</p>}
-      {r.phone && <p className="text-sm text-gray-600 mb-4">電話：{r.phone}</p>}
-      {r.licence && <p className="text-sm text-gray-600 mb-4">食環署：{r.licence}</p>}
+      {r.hours && <p className="text-sm muted mb-4">營業時間：{r.hours}</p>}
+      {r.phone && <p className="text-sm muted mb-4">電話：{r.phone}</p>}
+      {r.licence && <p className="text-sm muted mb-4">食環署：{r.licence}</p>}
 
-      <section className="mb-4">
+      <section className="card mb-4">
         <h2 className="font-medium mb-2">到訪 history</h2>
-        {r.visits.length === 0 ? <p className="text-sm text-gray-500">未記錄。</p> : null}
+        {r.visits.length === 0 ? <p className="text-sm muted">未記錄。</p> : null}
         <ul className="space-y-1 text-sm">
           {r.visits.map((v) => (
             <li key={v.id}>
@@ -55,17 +55,21 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         </ul>
         <form action={recordVisit} className="mt-3 flex gap-2">
           <input type="hidden" name="id" value={r.id} />
-          <input name="note" placeholder="備註（可空）" className="flex-1 border border-gray-200 rounded px-3 py-2" />
-          <button className="px-3 py-2 rounded-md bg-gray-900 text-white">記錄去過</button>
+          <input name="note" placeholder="備註（可空）" className="field flex-1" />
+          <button className="btn">記錄去過</button>
         </form>
       </section>
 
-      <section className="mb-4">
+      <section className="card mb-4">
         <h2 className="font-medium mb-2">餐牌</h2>
-        {r.menus.length === 0 ? <p className="text-sm text-gray-500">未記錄。</p> : null}
+        {r.menus.length === 0 ? <p className="text-sm muted">未記錄。</p> : null}
         {r.menus.map((m) => (
           <div key={m.id} className="text-sm mb-2">
-            {m.url ? <a href={m.url} className="text-gray-700 underline">餐牌檔案</a> : null}
+            {m.url ? (
+              <a href={m.url} className="underline">
+                餐牌檔案
+              </a>
+            ) : null}
             <ul className="mt-1">
               {m.items.map((it, i) => (
                 <li key={i}>{it}</li>
@@ -75,14 +79,14 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         ))}
         <form action={addMenu} className="mt-3">
           <input type="hidden" name="id" value={r.id} />
-          <textarea name="items" rows={4} placeholder="一行一個菜" className="w-full border border-gray-200 rounded px-3 py-2" />
-          <button className="mt-2 px-3 py-2 rounded-md bg-gray-900 text-white">加餐牌</button>
+          <textarea name="items" rows={4} placeholder="一行一個菜" className="field w-full" />
+          <button className="mt-2 btn">加餐牌</button>
         </form>
       </section>
 
-      <section className="mb-4">
+      <section className="card mb-4">
         <h2 className="font-medium mb-2">評價／改動記錄</h2>
-        {r.changes.length === 0 ? <p className="text-sm text-gray-500">冇記錄。</p> : null}
+        {r.changes.length === 0 ? <p className="text-sm muted">冇記錄。</p> : null}
         <ul className="space-y-1 text-sm">
           {r.changes.map((c) => (
             <li key={c.id}>
@@ -91,7 +95,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           ))}
         </ul>
       </section>
-
     </>
   );
 }

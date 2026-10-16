@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "../../lib/prisma";
 import { Tabs } from "../../components/Tabs";
 import { LunchGrid } from "../../components/LunchGrid";
+import { mallOf } from "../../lib/malls";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +39,7 @@ export default async function LunchPage(props: { searchParams: Promise<SearchPar
   const mode = MODES.some((m) => m.key === sp.mode) ? sp.mode! : "d";
   const budget = sp.budget ?? "";
   const cuisine = sp.cuisine ?? "";
+  const mall = sp.mall ?? "";
   const party = sp.party ? Number(sp.party) : null;
   const seed = sp.seed ? Number(sp.seed) : Math.floor(Math.random() * 1e9);
 
@@ -47,6 +49,20 @@ export default async function LunchPage(props: { searchParams: Promise<SearchPar
   if (budget) where.priceMax = { lte: Number(budget) };
   if (cuisine) where.cuisines = { has: cuisine };
   if (party) where.seats = { gte: party };
+
+  const all = await prisma.restaurant.findMany({ select: { id: true, address: true } });
+
+  const counts = new Map<string, number>();
+  for (const r of all) {
+    const m = mallOf(r.address);
+    counts.set(m, (counts.get(m) ?? 0) + 1);
+  }
+  const mallOptions = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+
+  if (mall) {
+    // 用 mallOf 計，同 pill 嘅數完全一致
+    where.id = { in: all.filter((r) => mallOf(r.address) === mall).map((r) => r.id) };
+  }
 
   const rows = await prisma.restaurant.findMany({ where, take: 200 });
 
@@ -59,8 +75,16 @@ export default async function LunchPage(props: { searchParams: Promise<SearchPar
   params.set("mode", mode);
   if (budget) params.set("budget", budget);
   if (cuisine) params.set("cuisine", cuisine);
+  if (mall) params.set("mall", mall);
   if (party) params.set("party", String(party));
   params.set("seed", String(seed));
+
+  const pillHref = (key: string, value: string) => {
+    const p = new URLSearchParams(params);
+    if (value) p.set(key, value);
+    else p.delete(key);
+    return `/lunch?${p.toString()}`;
+  };
 
   const cuisineOptions = Array.from(new Set(rows.flatMap((r) => r.cuisines))).sort();
 
@@ -70,42 +94,38 @@ export default async function LunchPage(props: { searchParams: Promise<SearchPar
 
       <div className="mb-4 space-y-3">
         <div className="flex flex-wrap gap-2">
-          {MODES.map((m) => {
-            const p = new URLSearchParams(params);
-            p.set("mode", m.key);
-            return (
-              <Link
-                key={m.key}
-                href={`/lunch?${p.toString()}`}
-                className={`px-3 py-1.5 rounded-full border ${mode === m.key ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 bg-white text-gray-700"}`}
-              >
-                {m.label}
-              </Link>
-            );
-          })}
+          {MODES.map((m) => (
+            <Link key={m.key} href={pillHref("mode", m.key)} className={`pill ${mode === m.key ? "pill-active" : ""}`}>
+              {m.label}
+            </Link>
+          ))}
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {BUDGETS.map((b) => {
-            const p = new URLSearchParams(params);
-            if (b) p.set("budget", b); else p.delete("budget");
-            return (
-              <Link
-                key={b || "unlimited"}
-                href={`/lunch?${p.toString()}`}
-                className={`px-3 py-1.5 rounded-full border ${budget === b ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 bg-white text-gray-700"}`}
-              >
-                {b ? `≤$${b}` : "唔設限"}
-              </Link>
-            );
-          })}
+          {BUDGETS.map((b) => (
+            <Link key={b || "unlimited"} href={pillHref("budget", b)} className={`pill ${budget === b ? "pill-active" : ""}`}>
+              {b ? `≤$${b}` : "唔設限"}
+            </Link>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Link href={pillHref("mall", "")} className={`pill ${mall === "" ? "pill-active" : ""}`}>
+            全部地點
+          </Link>
+          {mallOptions.map(([label, n]) => (
+            <Link key={label} href={pillHref("mall", label)} className={`pill ${mall === label ? "pill-active" : ""}`}>
+              {label} {n}
+            </Link>
+          ))}
         </div>
 
         <form method="get" action="/lunch" className="flex flex-wrap gap-2">
           <input type="hidden" name="mode" value={mode} />
           <input type="hidden" name="budget" value={budget} />
+          <input type="hidden" name="mall" value={mall} />
           <input type="hidden" name="seed" value={seed} />
-          <select name="cuisine" defaultValue={cuisine} className="border border-gray-200 rounded-md px-3 py-2 bg-white text-gray-900">
+          <select name="cuisine" defaultValue={cuisine} className="field">
             <option value="">菜式：唔拘</option>
             {cuisineOptions.map((c) => (
               <option key={c} value={c}>
@@ -118,20 +138,20 @@ export default async function LunchPage(props: { searchParams: Promise<SearchPar
             type="number"
             defaultValue={party ?? ""}
             placeholder="人數"
-            className="w-24 border border-gray-200 rounded-md px-3 py-2 text-gray-900"
+            className="field w-24"
           />
-          <button type="submit" className="px-3 py-2 rounded-md bg-gray-900 text-white">
+          <button type="submit" className="btn">
             開始揀
           </button>
         </form>
 
-        <Link href={`/lunch?${params.toString()}&seed=${Date.now()}`} className="px-3 py-2 rounded-md border border-gray-200 bg-white text-gray-700">
+        <Link href={`/lunch?${params.toString()}&seed=${Date.now()}`} className="btn-quiet">
           換一批
         </Link>
       </div>
 
       {picked.length === 0 ? (
-        <p className="text-gray-500">冇匹配嘅餐廳，試下放寬條件。</p>
+        <p className="muted">冇匹配嘅餐廳，試下放寬條件。</p>
       ) : (
         <LunchGrid
           cards={picked.map((r) => ({
@@ -140,6 +160,7 @@ export default async function LunchPage(props: { searchParams: Promise<SearchPar
             cuisines: r.cuisines,
             price: `人均 $${r.priceMin ?? "?"}–${r.priceMax ?? "?"}`,
             visited: r.visited,
+            mall: mallOf(r.address),
           }))}
         />
       )}

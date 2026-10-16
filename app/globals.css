@@ -1,15 +1,107 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #1f2937;
+  --bg: #f4f2ed;
+  --surface: #ffffff;
+  --ink: #22252b;
   --muted: #6b7280;
-  --line: #e5e7eb;
+  --line: #e3ded4;
   --accent: #b45309;
+  --accent-soft: #f6ecdf;
+  --accent-2: #1f6f5c;
+  --accent-2-soft: #e4efe9;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
+
+.field:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+h2 {
+  color: var(--ink);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--ink);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+h1 {
+  color: var(--ink);
+}
+
+a {
+  color: var(--accent);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+}
+
+.field {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  color: var(--ink);
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.pill-active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn {
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-quiet {
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: #7c4310;
+  font-size: 0.75rem;
+}
+
+.badge-alt {
+  background: var(--accent-2-soft);
+  color: var(--accent-2);
+}
+
+.muted {
+  color: var(--muted);
 }

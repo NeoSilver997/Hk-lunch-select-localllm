@@ -26,7 +26,7 @@ export type EditableRestaurant = {
 const NUMERIC = ["priceMin", "priceMax", "seats", "rating"];
 const BOOLEAN = ["hidden", "closed", "visited"];
 
-const field = "w-full border border-gray-200 rounded-md px-3 py-2 bg-white text-gray-900";
+const field = "w-full field";
 
 export function EditForm({ restaurant }: { restaurant: EditableRestaurant }) {
   const [secret, setSecret] = useState("");
@@ -68,9 +68,9 @@ export function EditForm({ restaurant }: { restaurant: EditableRestaurant }) {
   }
 
   return (
-    <form onSubmit={submit} className="space-y-3 bg-white text-gray-900">
+    <form onSubmit={submit} className="card space-y-3">
       <label className="block">
-        <span className="text-sm text-gray-600">x-admin-secret</span>
+        <span className="text-sm muted">x-admin-secret</span>
         <input
           name="secret"
           value={secret}
@@ -102,10 +102,10 @@ export function EditForm({ restaurant }: { restaurant: EditableRestaurant }) {
       </datalist>
 
       <div className="flex flex-wrap gap-2">
-        <input name="priceMin" type="number" defaultValue={restaurant.priceMin ?? ""} placeholder="人均最低" className="w-28 border border-gray-200 rounded-md px-3 py-2 bg-white text-gray-900" />
-        <input name="priceMax" type="number" defaultValue={restaurant.priceMax ?? ""} placeholder="人均最高" className="w-28 border border-gray-200 rounded-md px-3 py-2 bg-white text-gray-900" />
-        <input name="seats" type="number" defaultValue={restaurant.seats ?? ""} placeholder="座位" className="w-24 border border-gray-200 rounded-md px-3 py-2 bg-white text-gray-900" />
-        <input name="rating" type="number" step="0.1" defaultValue={restaurant.rating ?? ""} placeholder="評分" className="w-24 border border-gray-200 rounded-md px-3 py-2 bg-white text-gray-900" />
+        <input name="priceMin" type="number" defaultValue={restaurant.priceMin ?? ""} placeholder="人均最低" className="field w-28" />
+        <input name="priceMax" type="number" defaultValue={restaurant.priceMax ?? ""} placeholder="人均最高" className="field w-28" />
+        <input name="seats" type="number" defaultValue={restaurant.seats ?? ""} placeholder="座位" className="field w-24" />
+        <input name="rating" type="number" step="0.1" defaultValue={restaurant.rating ?? ""} placeholder="評分" className="field w-24" />
       </div>
 
       <input name="phone" defaultValue={restaurant.phone ?? ""} placeholder="電話" className={field} />
@@ -113,7 +113,7 @@ export function EditForm({ restaurant }: { restaurant: EditableRestaurant }) {
       <input name="licence" defaultValue={restaurant.licence ?? ""} placeholder="食環署核對" className={field} />
 
       <label className="block">
-        <span className="text-sm text-gray-600">備註</span>
+        <span className="text-sm muted">備註</span>
         <textarea name="notes" rows={3} defaultValue={restaurant.notes ?? ""} className={field} />
       </label>
 
@@ -133,10 +133,10 @@ export function EditForm({ restaurant }: { restaurant: EditableRestaurant }) {
       </div>
 
       <div className="flex items-center gap-2">
-        <button type="submit" disabled={busy} className="px-3 py-2 rounded-md bg-gray-900 text-white disabled:opacity-50">
+        <button type="submit" disabled={busy} className="btn disabled:opacity-50">
           保存
         </button>
-        {status && <span className="text-sm text-gray-700">{status}</span>}
+        {status && <span className="text-sm muted">{status}</span>}
       </div>
     </form>
   );

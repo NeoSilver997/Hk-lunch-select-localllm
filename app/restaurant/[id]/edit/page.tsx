@@ -12,14 +12,14 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   return (
     <>
-      <p className="text-sm text-gray-500 mb-3">
-        <Link href={`/restaurant/${r.id}`} className="text-gray-700 underline">
+      <p className="text-sm mb-3">
+        <Link href={`/restaurant/${r.id}`} className="underline">
           ← 返回詳情
         </Link>
       </p>
 
       <h1 className="text-xl font-medium mb-1">編輯餐廳</h1>
-      <p className="text-sm text-gray-600 mb-4">
+      <p className="text-sm muted mb-4">
         {[r.nameZh, r.nameEn].filter(Boolean).join(" / ") || r.address}
       </p>
 
