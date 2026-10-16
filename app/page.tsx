@@ -159,6 +159,9 @@ export default async function Page(props: { searchParams: Promise<SearchParams> 
             </div>
             {r.visited && <span className="text-xs text-gray-500">去過</span>}
             {r.closed && <span className="text-xs text-red-600">已結業</span>}
+            <Link href={`/restaurant/${r.id}/edit`} className="text-xs text-gray-500 ml-2">
+              編輯
+            </Link>
           </li>
         ))}
       </ul>

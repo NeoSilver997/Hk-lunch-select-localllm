@@ -1,6 +1,6 @@
+import Link from "next/link";
 import { prisma } from "../../../lib/prisma";
 import { recordVisit, addMenu } from "../../actions";
-import { AdminModal } from "../../../components/AdminModal";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +23,15 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       <h1 className="text-xl font-medium mb-1">
         {[r.nameZh, r.nameEn].filter(Boolean).join(" / ") || r.address}
       </h1>
+
+      <p className="mb-4">
+        <Link
+          href={`/restaurant/${r.id}/edit`}
+          className="px-3 py-2 rounded-md border border-gray-200 bg-white text-gray-900"
+        >
+          編輯
+        </Link>
+      </p>
 
       <div className="text-sm text-gray-600 mb-4">
         {r.cuisines.join(" / ")} · {r.address} · 人均 ${r.priceMin ?? "?"}–${r.priceMax ?? "?"} ·{" "}
@@ -83,25 +92,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         </ul>
       </section>
 
-      <AdminModal
-        restaurant={{
-          id: r.id,
-          nameZh: r.nameZh,
-          nameEn: r.nameEn,
-          address: r.address,
-          district: r.district,
-          cuisines: r.cuisines,
-          priceMin: r.priceMin,
-          priceMax: r.priceMax,
-          seats: r.seats,
-          rating: r.rating,
-          phone: r.phone,
-          hours: r.hours,
-          hidden: r.hidden,
-          closed: r.closed,
-          visited: r.visited,
-        }}
-      />
     </>
   );
 }
